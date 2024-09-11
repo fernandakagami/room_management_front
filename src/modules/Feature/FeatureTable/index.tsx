@@ -37,6 +37,10 @@ interface IFeature {
   name: string;
 }
 
+const defaultValues = {
+  name: "",
+};
+
 export default function FeatureTable() {
   const [features, setFeatures] = useState([]);
 
@@ -44,9 +48,7 @@ export default function FeatureTable() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-    },
+    defaultValues
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -56,9 +58,11 @@ export default function FeatureTable() {
           title: "Yay!!! Success",
           description: "Feature registred",
         })
+        form.reset(defaultValues);
         fetchFeatures();
       })
       .catch((error) => {
+        console.log(error);
         toast({
           title: "Uh oh! Something went wrong.",
           description: error.response.data.name,
@@ -89,6 +93,7 @@ export default function FeatureTable() {
         setFeatures(response.data);
       })
       .catch((error) => {
+        console.log(error);
         toast({
           title: "Uh oh! Something went wrong.",
           description: error.response.data,

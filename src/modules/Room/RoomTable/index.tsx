@@ -1,9 +1,5 @@
 "use client"
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
 import {
   Table,
   TableBody,
@@ -12,27 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { instance } from "@/services"
 import { useToast } from "@/components/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { CreateRoomModal } from "../Modal/CreateRoomModal"
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Feature must be at least 2 characters.",
-  }),
-})
 
 interface IRoom {
   id: string;
@@ -44,30 +24,6 @@ export default function RoomTable() {
 
   const { toast } = useToast()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-    },
-  })
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    instance.post(`/rooms`, values)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Room registred",
-        })
-        fetchFeatures();
-      })
-      .catch((error) => {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data.name,
-        })
-      })
-  }
-
   const handleDelete = (id: string) => {
     instance.delete(`/room/${id}`)
       .then((response) => {
@@ -75,7 +31,7 @@ export default function RoomTable() {
           title: "Yay!!! Success",
           description: "Room removed",
         })
-        fetchFeatures();
+        fetchRooms();
       })
       .catch((error) => {
         toast({
@@ -85,7 +41,7 @@ export default function RoomTable() {
       })
   }
 
-  const fetchFeatures = () => {
+  const fetchRooms = () => {
     instance.get(`/room`)
       .then((response) => {
         getRooms(response.data);
@@ -99,14 +55,14 @@ export default function RoomTable() {
   }
 
   useEffect(() => {
-    fetchFeatures();
+    fetchRooms();
   }, []);
 
   return (
     <>
       <div className="flex flew-row justify-between items-center mb-5">
         <h1>Rooms</h1>
-        <CreateRoomModal />
+        <CreateRoomModal fetchRooms={fetchRooms} />
 
       </div>
 
