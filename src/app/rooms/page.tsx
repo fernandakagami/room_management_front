@@ -1,4 +1,4 @@
-import RoomTable from "@/modules/Room/RoomTable";
+import RoomTable from "@/modules/Room/component/RoomTable";
 
 export default function RoomsTable() {
   return (
