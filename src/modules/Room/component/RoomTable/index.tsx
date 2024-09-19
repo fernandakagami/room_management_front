@@ -14,13 +14,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { instance } from "@/services"
 import { useToast } from "@/components/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { CreateRoomModal } from "../Modal/CreateRoomModal"
 import { Badge } from "@/components/ui/badge"
 import { UpdateRoomModal } from "../Modal/UpdateRoomModal"
 import { DeleteAlertDialogComponent } from "@/shared/DeleteAlertDialogComponent"
+import { deleteRoom, fetchRooms } from "../../actions/room.action"
+import { returnErrorMessageToast } from "@/utils/returnErrorMessageToast"
+import { ScheduleRoomModal } from "../Modal/ScheduleRoomModal"
 
 interface IRoom {
   id: string;
@@ -33,45 +35,50 @@ export default function RoomTable() {
 
   const { toast } = useToast()
 
-  const handleDelete = (id: string) => {
-    instance.delete(`/room/${id}`)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Room removed",
-        })
-        fetchRooms();
+  async function handleDelete(id: string) {
+    try {
+      await deleteRoom(id);
+
+      toast({
+        title: "Yay!!! Success",
+        description: "Room removed",
       })
-      .catch((error) => {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data,
-        })
+      getAllRooms();
+
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
+    }
   }
 
-  const fetchRooms = () => {
-    instance.get(`/room`)
-      .then((response) => {
-        getRooms(response.data);
+  async function getAllRooms() {
+    try {
+      const response = await fetchRooms();
+
+      getRooms(response);
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
-      .catch((error) => {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data,
-        })
-      })
+    }
   }
 
   useEffect(() => {
-    fetchRooms();
+    getAllRooms();
   }, []);
 
   return (
     <>
       <div className="flex flew-row justify-between items-center mb-5">
         <h1>Rooms</h1>
-        <CreateRoomModal fetchRooms={fetchRooms} />
+        <CreateRoomModal fetchRooms={getAllRooms} />
       </div>
 
       <Table>
@@ -88,15 +95,25 @@ export default function RoomTable() {
               <TableCell className="font-medium">{room.name}</TableCell>
               <TableCell className="font-medium flex flex-row gap-1">{room?.features?.map((feature) => <Badge key={feature.created_at}>{feature.name}</Badge>)}</TableCell>
               <TableCell className="font-medium">
-                <div className="flex flex-row items-center gap-1">
+                <div className="flex flex-row items-center gap-2">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger><UpdateRoomModal fetchRooms={fetchRooms} room={room} /></TooltipTrigger>
+                      <TooltipTrigger><UpdateRoomModal fetchRooms={getAllRooms} room={room} /></TooltipTrigger>
                       <TooltipContent>
                         Edit Room
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger><ScheduleRoomModal fetchRooms={getAllRooms} room={room} /></TooltipTrigger>
+                      <TooltipContent>
+                        Schedule Room
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger><DeleteAlertDialogComponent method={handleDelete} id={room.id} type="room" /></TooltipTrigger>

@@ -26,6 +26,8 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { Pencil } from "lucide-react"
+import { updateRoom } from "@/modules/Room/actions/room.action"
+import { returnErrorMessageToast } from "@/utils/returnErrorMessageToast"
 
 const defaultValues = {
   name: "",
@@ -58,23 +60,27 @@ export function UpdateRoomModal({ fetchRooms, room }: TUpdateRoomModal) {
     }
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    instance.put(`/room/${room.id}`, values)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Room updated",
-        })
-        form.reset(defaultValues);
-        fetchRooms();
-        setOpen(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await updateRoom(room.id, values);
+
+      toast({
+        title: "Yay!!! Success",
+        description: "Room registred",
       })
-      .catch((error) => {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data.name,
-        })
+
+      form.reset(defaultValues);
+      fetchRooms();
+      setOpen(false);
+
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
+    }
   }
 
   const fetchFeatures = () => {

@@ -31,6 +31,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { createFeature, deleteFeature, fetchFeatures, updateFeature } from "../actions/feature.action"
+import { returnErrorMessageToast } from "@/utils/returnErrorMessageToast"
+import { DeleteAlertDialogComponent } from "@/shared/DeleteAlertDialogComponent"
 
 const formSchema = z.object({
   name: z.string(),
@@ -66,7 +69,7 @@ export default function FeatureTable() {
     resolver: zodResolver(FormSchema),
   })
 
-  function handleCreateFeature(values: z.infer<typeof formSchema>) {
+  async function handleCreateFeature(values: z.infer<typeof formSchema>) {
     if (values.name.length < 2) {
       return toast({
         title: "Uh oh! Something went wrong.",
@@ -74,25 +77,28 @@ export default function FeatureTable() {
       })
     }
 
-    instance.post(`/feature`, values)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Feature registred",
-        })
-        form.reset(defaultValues);
-        fetchFeatures();
+    try {
+      await createFeature(values);
+
+      toast({
+        title: "Yay!!! Success",
+        description: "Feature registred",
       })
-      .catch((error) => {
-        console.log(error);
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data.name,
-        })
+
+      form.reset(defaultValues);
+      fetchAllFeatures();
+
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
+    }
   }
 
-  function handleEditFeature(id: string, values: z.infer<typeof formSchema>) {
+  async function handleUpdateFeature(id: string, values: z.infer<typeof formSchema>) {
     if (values.name.length < 2) {
       return toast({
         title: "Uh oh! Something went wrong.",
@@ -100,64 +106,69 @@ export default function FeatureTable() {
       })
     }
 
-    instance.put(`/feature/${id}`, values)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Feature updated",
-        })
-        openEditField("")
-        fetchFeatures();
+    try {
+      await updateFeature(id, values);
+
+      toast({
+        title: "Yay!!! Success",
+        description: "Feature updated",
       })
-      .catch((error) => {
-        console.log(error);
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data.name,
-        })
+      openUpdateField("")
+      fetchAllFeatures();
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
+    }
   }
 
-  function openEditField(featureId: string) {
+  function openUpdateField(featureId: string) {
     if (isEditing === featureId) {
       return setIsEditing("");
     }
     return setIsEditing(featureId);
   }
 
-  const handleDelete = (id: string) => {
-    instance.delete(`/feature/${id}`)
-      .then((response) => {
-        toast({
-          title: "Yay!!! Success",
-          description: "Feature removed",
-        })
-        fetchFeatures();
+  async function handleDelete(id: string) {
+    try {
+      await deleteFeature(id);
+
+      toast({
+        title: "Yay!!! Success",
+        description: "Feature removed",
       })
-      .catch((error) => {
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data,
-        })
+      fetchAllFeatures();
+
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
+    }
   }
 
-  const fetchFeatures = () => {
-    instance.get(`/feature`)
-      .then((response) => {
-        setFeatures(response.data);
+  async function fetchAllFeatures() {
+    try {
+      const response = await fetchFeatures();
+
+      setFeatures(response);
+    } catch (error) {
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
       })
-      .catch((error) => {
-        console.log(error);
-        toast({
-          title: "Uh oh! Something went wrong.",
-          description: error.response.data,
-        })
-      })
+    }
   }
 
   useEffect(() => {
-    fetchFeatures();
+    fetchAllFeatures();
   }, []);
 
   return (
@@ -194,7 +205,7 @@ export default function FeatureTable() {
             <TableRow key={feature.id}>
               <TableCell className="font-medium flex flex-row items-center justify-between h-12">
                 {isEditing === feature.id ? <div className="flex flex-row justify-between items-center w-full me-6"><Form {...form}>
-                  <form onSubmit={nameForm.handleSubmit((values) => handleEditFeature(feature.id, values))} className="w-full flex flex-row justify-between items-center">
+                  <form onSubmit={nameForm.handleSubmit((values) => handleUpdateFeature(feature.id, values))} className="w-full flex flex-row justify-between items-center">
                     <FormField
                       control={nameForm.control}
                       name="name"
@@ -207,11 +218,11 @@ export default function FeatureTable() {
                         </FormItem>
                       )}
                     />
-                    <div className="flex flex-row items-center gap-1"><Button className="text-sm py-0 px-4" type="submit">Edit</Button><Button className="text-sm py-0 px-4" onClick={() => openEditField("")}>Cancel</Button></div>
+                    <div className="flex flex-row items-center gap-1"><Button className="text-sm py-0 px-4" type="submit">Edit</Button><Button className="text-sm py-0 px-4" onClick={() => openUpdateField("")}>Cancel</Button></div>
                   </form>
                 </Form></div> : <div className="flex flex-row items-center gap-2">{feature.name}<TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger><Pencil className="text-blue-500 cursor-pointer" size={18} onClick={() => openEditField(feature.id)} /></TooltipTrigger>
+                    <TooltipTrigger><Pencil className="text-blue-500 cursor-pointer" size={18} onClick={() => openUpdateField(feature.id)} /></TooltipTrigger>
                     <TooltipContent>
                       Edit Feature
                     </TooltipContent>
@@ -220,7 +231,7 @@ export default function FeatureTable() {
                 <div className="flex flex-row gap-3 items-center">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger> <X className="text-red-500 cursor-pointer" size={24} onClick={() => handleDelete(feature.id)} /></TooltipTrigger>
+                      <TooltipTrigger><DeleteAlertDialogComponent method={handleDelete} id={feature.id} type="feature" /></TooltipTrigger>
                       <TooltipContent>
                         Delete Feature
                       </TooltipContent>

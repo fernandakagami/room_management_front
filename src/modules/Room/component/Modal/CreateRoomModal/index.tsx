@@ -25,7 +25,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Input } from "@/components/ui/input"
-import { CreateRoom } from "@/modules/Room/action/room.action"
+import { createRoom } from "@/modules/Room/actions/room.action"
+import { returnErrorMessageToast } from "@/utils/returnErrorMessageToast"
 
 const defaultValues = {
   name: "",
@@ -56,29 +57,24 @@ export function CreateRoomModal({ fetchRooms }: TCreateRoomModal) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const data = await CreateRoom(values)
+      await createRoom(values);
 
-      console.log(data);
+      toast({
+        title: "Yay!!! Success",
+        description: "Room registred",
+      })
 
-      if (data.error)
-        console.log(data);
-      // .then((response) => {
-      //   toast({
-      //     title: "Yay!!! Success",
-      //     description: "Room registred",
-      //   })
-      //   form.reset(defaultValues);
-      //   fetchRooms();
-      //   setOpen(false);
-      // })
-      //   .catch((error) => {
-      //     toast({
-      //       title: "Uh oh! Something went wrong.",
-      //       description: error.response.data.name,
-      //     })
-      //   })
+      form.reset(defaultValues);
+      fetchRooms();
+      setOpen(false);
+
     } catch (error) {
-      console.log(error);
+      const message = returnErrorMessageToast(error);
+
+      toast({
+        title: "Uh oh! Something went wrong.",
+        description: message,
+      })
     }
   }
 
