@@ -22,7 +22,6 @@ import { UpdateRoomModal } from "../Modal/UpdateRoomModal"
 import { DeleteAlertDialogComponent } from "@/shared/DeleteAlertDialogComponent"
 import { deleteRoom, fetchRooms } from "../../actions/room.action"
 import { returnErrorMessageToast } from "@/utils/returnErrorMessageToast"
-import { ScheduleRoomModal } from "../Modal/ScheduleRoomModal"
 
 interface IRoom {
   id: string;
@@ -107,16 +106,7 @@ export default function RoomTable() {
 
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger><ScheduleRoomModal fetchRooms={getAllRooms} room={room} /></TooltipTrigger>
-                      <TooltipContent>
-                        Schedule Room
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger><DeleteAlertDialogComponent method={handleDelete} id={room.id} type="room" /></TooltipTrigger>
+                      <TooltipTrigger><DeleteAlertDialogComponent method={() => handleDelete(room.id)} type="room" /></TooltipTrigger>
                       <TooltipContent>
                         Delete Room
                       </TooltipContent>
