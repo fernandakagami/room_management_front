@@ -21,7 +21,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { instance } from "@/services"
 import { useToast } from "@/components/hooks/use-toast"
 import { useEffect, useState } from "react"
 import { Pencil, X } from "lucide-react"
@@ -231,7 +230,7 @@ export default function FeatureTable() {
                 <div className="flex flex-row gap-3 items-center">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger><DeleteAlertDialogComponent method={handleDelete} id={feature.id} type="feature" /></TooltipTrigger>
+                      <TooltipTrigger><DeleteAlertDialogComponent method={() => handleDelete(feature.id)} type="feature" /></TooltipTrigger>
                       <TooltipContent>
                         Delete Feature
                       </TooltipContent>

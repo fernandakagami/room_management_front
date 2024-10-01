@@ -12,12 +12,11 @@ import {
 import { X } from "lucide-react";
 
 type TDeleteAlertDialogComponent = {
-  method: (id: string) => void;
-  id: string;
+  method: () => void;
   type: string;
 }
 
-export function DeleteAlertDialogComponent({ method, id, type }: TDeleteAlertDialogComponent) {
+export function DeleteAlertDialogComponent({ method, type }: TDeleteAlertDialogComponent) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -32,7 +31,7 @@ export function DeleteAlertDialogComponent({ method, id, type }: TDeleteAlertDia
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction className="bg-red-500" onClick={() => method(id)}>Delete</AlertDialogAction>
+          <AlertDialogAction className="bg-red-500" onClick={method}>Delete</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
