@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from "@/components/ui/button"
-import { Pencil, NotebookPenIcon } from "lucide-react"
+import { Pencil, NotebookPenIcon, Calendar } from "lucide-react"
 import Link from "next/link"
 
 export default function SideBarComponent() {
@@ -13,6 +13,9 @@ export default function SideBarComponent() {
       </Link>
       <Link href="/rooms" scroll={false}>
         <Button variant="ghost" className="w-full flex flex-row items-center justify-start rounded-lg"><NotebookPenIcon className="mr-2 h-4 w-4" /><span className="text-sm" >Rooms</span></Button>
+      </Link>
+      <Link href="/schedules" scroll={false}>
+        <Button variant="ghost" className="w-full flex flex-row items-center justify-start rounded-lg"><Calendar className="mr-2 h-4 w-4" /><span className="text-sm" >Schedules</span></Button>
       </Link>
     </div>
   )
