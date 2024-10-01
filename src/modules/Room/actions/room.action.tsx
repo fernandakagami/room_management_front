@@ -24,26 +24,27 @@ export async function deleteRoom(id: string) {
   return data;
 }
 
-export async function fetchSchedules(id: string) {
-  const { data } = await instance.get(`/room/${id}/schedule`);
+export async function createSchedule(values: {
+  id: string,
+  title: string
+  start_time: Date
+  end_time: Date
+}) {
+  const { data } = await instance.post(`/room/${values.id}/schedule`, values);
 
   return data;
 }
 
-export async function createSchedule(id: string, values: any) {
-  const { data } = await instance.post(`/room/${id}/schedule`, values);
+export async function updateSchedule(values: {
+  id: string,
+  scheduleId: number,
+  title: string
+  start_time: Date
+  end_time: Date
+}) {
+  const { data } = await instance.put(`/room/${values.id}/schedule/${values.scheduleId}`, values);
 
   return data;
 }
 
-export async function updateSchedule(id: string, scheduleId: string, values: any) {
-  const { data } = await instance.put(`/room/${id}/schedule/${scheduleId}`, values);
 
-  return data;
-}
-
-export async function deleteSchedule(id: string, scheduleId: string) {
-  const { data } = await instance.delete(`/room/${id}/schedule/${scheduleId}`);
-
-  return data;
-}
